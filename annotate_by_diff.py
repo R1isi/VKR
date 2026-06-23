@@ -29,6 +29,9 @@ def parse_args():
     p.add_argument("--max-sessions", type=int, default=0, help="0 = все сессии")
     p.add_argument("--preview", type=int, default=40, help="сколько превью сохранить (0 — нет)")
     p.add_argument("--no-grabcut", action="store_true", help="отключить уточнение масок GrabCut")
+    p.add_argument("--horizon", type=int, default=0,
+                   help="сколько следующих снятых объектов включать в "
+                        "top_mask; 0 = до конца сессии (старое поведение)")
     return p.parse_args()
 
 def ts(name):
@@ -230,7 +233,8 @@ def main():
                 prev_a -= 1
 
         for t in range(n):
-            present = [m for m in masks[t:] if m is not None]
+            end = n if args.horizon <= 0 else min(n, t + args.horizon)
+            present = [m for m in masks[t:end] if m is not None]
             top = top_objects_mask(present)
             if top is None:
                 continue
@@ -254,3 +258,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
